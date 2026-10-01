@@ -1,0 +1,15 @@
+# Contoh format daftar proxy (satu per baris):
+# 1. HTTP / HTTPS Proxy dengan autentikasi:
+# http://username:password@103.123.45.67:8080
+#
+# 2. HTTP Proxy tanpa autentikasi:
+# http://103.123.45.67:8080
+# atau cukup:
+# 103.123.45.67:8080
+#
+# 3. Format ip:port:username:password (format umum penjual proxy):
+# 103.123.45.67:8080:username:password
+#
+# 4. SOCKS5 Proxy:
+# socks5://103.123.45.67:1080
+# socks5://username:password@103.123.45.67:1080

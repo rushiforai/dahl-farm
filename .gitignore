@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Dahl Accounts & Private Credentials (JANGAN DI-PUSH / RAHASIA)
+creds/
+keys.txt
+keys_farmed.txt
+
+# Proxies & Runtime Scrapes
+proxies_all.txt
+proxies_good.txt
+data.txt
+
+# Tor Binaries & Pool
+tor/
+.tor_pool/
+
+# Environment Variables & Config
+.env
+.env.local
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
