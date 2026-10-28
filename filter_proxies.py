@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""filter_proxies.py - Filter proxy yang aktif, cepat, dan lolos ke inference.dahl.global.
+"""filter_proxies.py - Filter active, fast proxies that can reach inference.dahl.global.
 
-Proxy yang berhasil akan langsung disimpan secara real-time ke 'proxies_good.txt'.
-Mendukung input file seperti 'data.txt', 'proxies_all.txt', atau auto-scrape dari internet jika file belum ada.
+Successfully validated proxies are saved in real time to 'proxies_good.txt'.
+Supports input files such as 'data.txt', 'proxies_all.txt', or automatic scraping from the internet if no file exists.
 """
 
 import os
@@ -17,8 +17,8 @@ if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 TARGET_URL = 'https://inference.dahl.global/v1/auth/signup'
-TIMEOUT = 4.0       # Maksimal respon detik
-MAX_WORKERS = 80    # Jumlah thread paralel
+TIMEOUT = 4.0       # Maximum response time in seconds
+MAX_WORKERS = 80    # Number of parallel threads
 
 GRN, RED, YEL, CYN, DIM, RST = '\033[32m', '\033[31m', '\033[33m', '\033[36m', '\033[2m', '\033[0m'
 
@@ -32,8 +32,8 @@ PUBLIC_SOURCES = [
 
 
 def auto_scrape_proxies():
-    """Mengambil proxy publik gratis dari berbagai repositori terpercaya."""
-    print(f"  {YEL}[*] Mengunduh proxy publik gratis dari beberapa sumber...{RST}")
+    """Fetch free public proxies from several trusted sources."""
+    print(f"  {YEL}[*] Downloading free public proxies from multiple sources...{RST}")
     scraped = set()
     for src in PUBLIC_SOURCES:
         try:
@@ -52,12 +52,12 @@ def auto_scrape_proxies():
                         scraped.add(line)
         except Exception:
             pass
-    print(f"  {GRN}[V] Berhasil mengumpulkan {len(scraped):,} proxy publik gratis!{RST}\n")
+    print(f"  {GRN}[V] Successfully collected {len(scraped):,} free public proxies!{RST}\n")
     return list(scraped)
 
 
 def check_proxy(proxy_url):
-    """Mengecek apakah proxy hidup, cepat, dan memiliki kuota signup bersih di Dahl."""
+    """Check whether a proxy is alive, fast, and has clean Dahl signup capacity."""
     p = proxy_url.strip()
     if not p:
         return None
@@ -83,10 +83,10 @@ def check_proxy(proxy_url):
                 }
             )
             latency = (time.time() - t0) * 1000
-            # Jika 429 = Sudah limit/dipakai orang lain. REJECT!
+            # If 429 = rate limited / already used by someone else. REJECT!
             if r.status_code == 429:
                 return None
-            # Jika 400/422 = Domain merespons username invalid -> IP BERSIH & ADA KUOTA!
+            # If 400/422 = the domain responds with an invalid username -> IP IS CLEAN AND HAS AVAILABLE QUOTA!
             if r.status_code in (400, 422, 200, 201):
                 return p, latency, r.status_code
     except Exception:
@@ -133,10 +133,10 @@ def main():
     else:
         print(f"  Input File   : {YEL}Auto-Scrape (Online Sources){RST}")
         all_proxies = auto_scrape_proxies()
-        # Simpan raw list ke proxies_all.txt
+        # Save the raw list to proxies_all.txt
         raw_file = here / 'proxies_all.txt'
         raw_file.write_text("\n".join(all_proxies), encoding='utf-8')
-        print(f"  {DIM}Daftar mentah disimpan ke {raw_file.name}{RST}")
+        print(f"  {DIM}Raw list saved to {raw_file.name}{RST}")
 
     seen = set()
     deduped = []
@@ -147,17 +147,17 @@ def main():
     all_proxies = deduped
 
     total = len(all_proxies)
-    print(f"  Total Proxy  : {total:,} proxy unik dimuat.")
+    print(f"  Total Proxies: {total:,} unique proxies loaded.")
     print(f"  Output File  : {output_file.name}\n")
 
     existing_good = set()
     if output_file.exists():
         with open(output_file, 'r', encoding='utf-8', errors='ignore') as f:
             existing_good = {line.strip() for line in f if line.strip()}
-        print(f"  {DIM}Sudah ada {len(existing_good)} proxy di {output_file.name}{RST}\n")
+        print(f"  {DIM}{len(existing_good)} proxies already exist in {output_file.name}{RST}\n")
 
-    print(f"  {YEL}Mencari {target_count} proxy aktif...{RST}")
-    print(f"  {DIM}(Tekan Ctrl+C kapan saja untuk berhenti, hasil tersimpan otomatis){RST}\n")
+    print(f"  {YEL}Finding {target_count} active proxies...{RST}")
+    print(f"  {DIM}(Press Ctrl+C anytime to stop; results are saved automatically){RST}\n")
 
     good_count = 0
     checked_count = 0
@@ -195,7 +195,7 @@ def main():
                             print(f"  {GRN}V [{good_count:02d}/{target_count}]{RST} {good_p}  {DIM}({latency:.0f}ms, status {status}){RST}")
 
                             if good_count >= target_count:
-                                print(f"\n  {GRN}Target {target_count} proxy aktif tercapai!{RST}")
+                                print(f"\n  {GRN}Target {target_count} active proxies reached!{RST}")
                                 for fut in futures:
                                     fut.cancel()
                                 break
@@ -205,16 +205,16 @@ def main():
                         futures[executor.submit(check_proxy, next_p)] = next_p
 
                     if checked_count % 30 == 0:
-                        sys.stdout.write(f"\r  {DIM}Memeriksa: {checked_count:,}/{total:,} | Ditemukan: {good_count} bagus | Waktu: {time.time()-t_start:.1f}s{RST} ")
+                        sys.stdout.write(f"\r  {DIM}Checking: {checked_count:,}/{total:,} | Found: {good_count} good | Time: {time.time()-t_start:.1f}s{RST} ")
                         sys.stdout.flush()
 
             except KeyboardInterrupt:
-                print(f"\n\n  {YEL}Dihentikan pengguna. Hasil tersimpan di {output_file.name}.{RST}")
+                print(f"\n\n  {YEL}Stopped by user. Results saved in {output_file.name}.{RST}")
 
     print(f"\n\n{CYN}======================================================{RST}")
-    print(f"  {GRN}Selesai!{RST}")
-    print(f"  Proxy baru didapat : {good_count}")
-    print(f"  Total di {output_file.name} : {len(existing_good)}")
+    print(f"  {GRN}Done!{RST}")
+    print(f"  New proxies found : {good_count}")
+    print(f"  Total in {output_file.name} : {len(existing_good)}")
     print(f"{CYN}======================================================{RST}\n")
 
 

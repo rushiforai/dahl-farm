@@ -3,7 +3,7 @@ chcp 65001 >nul
 title Dahl Farm - Auto Farm (Proxy Required)
 cd /d "%~dp0"
 
-REM Jika dipanggil dengan argumen (misal: run.bat 5), langsung jalankan gachafarm
+REM If called with arguments (for example: run.bat 5), run gachafarm immediately
 if not "%~1"=="" (
     python dahl_farm.py gachafarm %*
     goto selesai
@@ -12,18 +12,18 @@ if not "%~1"=="" (
 :menu
 cls
 echo ============================================================
-echo      DAHL GLOBAL FARM (PASTI MENGGUNAKAN PROXY)
+echo      DAHL GLOBAL FARM (ALWAYS USE PROXY)
 echo ============================================================
 echo.
-echo  [1] Farm Akun (Wajib Pakai Proxy - Anti 429 dan Auto 9Router)
-echo  [2] Filter / Cari Proxy Aktif Baru (filter_proxies.bat)
-echo  [3] Inject Ulang Semua Key Tersimpan ke 9Router
-echo  [4] Lihat Daftar Akun yang Sudah Terkumpul
-echo  [5] Cek / Verifikasi Token API Key
-echo  [0] Keluar
+echo  [1] Farm Accounts (Requires Proxy - Anti 429 and Auto 9Router)
+echo  [2] Filter / Find New Active Proxy (filter_proxies.bat)
+echo  [3] Re-Inject All Saved Keys into 9Router
+echo  [4] View the List of Accounts Already Collected
+echo  [5] Check / Verify API Key Token
+echo  [0] Exit
 echo.
 echo ============================================================
-set /p OPT="Pilih menu [1-5, 0]: "
+set /p OPT="Select menu [1-5, 0]: "
 
 if "%OPT%"=="1" goto opt_farm
 if "%OPT%"=="2" goto opt_filter
@@ -35,10 +35,10 @@ goto menu
 
 :opt_farm
 echo.
-set /p JML="Berapa banyak akun yang ingin di-farm? [Default: 1]: "
+set /p JML="How many accounts do you want to farm? [Default: 1]: "
 if "%JML%"=="" set JML=1
 echo.
-echo [*] Menjalankan farm %JML% akun dengan rotasi proxy...
+echo [*] Running farm for %JML% accounts with proxy rotation...
 python dahl_farm.py gachafarm %JML%
 echo.
 pause
@@ -65,7 +65,7 @@ goto menu
 
 :opt_check
 echo.
-set /p TOK="Masukkan Token Dahl (contoh: dahl_xxxx): "
+set /p TOK="Enter Dahl Token (example: dahl_xxxx): "
 if not "%TOK%"=="" (
     echo.
     python dahl_farm.py check %TOK%

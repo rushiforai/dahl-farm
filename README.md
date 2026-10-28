@@ -1,146 +1,146 @@
 # 🚀 Dahl Global API Auto-Farm
 
-Alat otomatisasi cerdas berkecepatan tinggi untuk menghasilkan dan mengelola API Key gratis dari **[Dahl Global](https://dahl.global)** secara massal, dilengkapi dengan filter proxy cerdas, rotasi Tor pool, dan integrasi otomatis ke **9Router**.
+A high-speed intelligent automation tool for mass-generating and managing free API keys from **[Dahl Global](https://dahl.global)**, equipped with smart proxy filtering, Tor pool rotation, and automatic integration with **9Router**.
 
 ---
 
 > [!IMPORTANT]
-> **Membutuhkan Proxy agar Tidak Menghambat Proses Farm (Anti Rate-Limit 429)**
-> Server Dahl Global membatasi pendaftaran akun per alamat IP (*HTTP 429 Too Many Requests*). Oleh karena itu, **penggunaan proxy (HTTP / SOCKS5) sangat diwajibkan** agar proses farming akun berjalan lancar, cepat, dan tidak terhambat oleh jeda cooldown IP.
+> **A Proxy Is Required to Avoid Disrupting the Farm Process (Anti Rate-Limit 429)**
+> The Dahl Global server limits account registration per IP address (*HTTP 429 Too Many Requests*). Therefore, **using a proxy (HTTP / SOCKS5) is strongly required** so the farming process runs smoothly, quickly, and without cooldown delays or IP restrictions.
 >
-> 💡 *Tidak punya proxy pribadi?* Anda tidak perlu mencari atau membeli proxy manual! Repository ini sudah dilengkapi **Auto-Scraper & Health Checker Proxy bawaan** (`filter_proxies.py` atau Menu `[2]` pada `run.bat`) yang otomatis mencari dan memvalidasi proxy publik aktif secara gratis.
+> 💡 *Do you not have your own proxy?* You do not need to search for or buy one manually! This repository includes a built-in **Auto-Scraper & Proxy Health Checker** (`filter_proxies.py` or Menu `[2]` in `run.bat`) that automatically finds and validates active public proxies for free.
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Main Features
 
-- 🤖 **Auto-Signup & Provisioning**: Otomatis membuat username acak, mendaftar akun, mengalokasikan saldo token gratis (*free token grant*) ke API key baru, dan memverifikasi kelayakan inferensi.
-- 🎲 **Gacha Proxy Farm**: Memilih proxy hidup secara acak dari daftar yang terverifikasi untuk menghindari pembatasan IP (*Rate Limit HTTP 429*).
-- 🔍 **Built-in Proxy Checker & Scraper**: Fitur auto-scrape dari berbagai repositori publik dan pengecekan latency secara paralel real-time.
-- 🧅 **Tor Pool Multi-Instance**: Mendukung pembuatan cluster instans Tor lokal untuk rotasi identitas otomatis tanpa batas.
-- 🔌 **Auto-Inject ke 9Router**: Otomatis memasukkan API key yang berhasil di-farm langsung ke database SQLite aplikasi [9Router](https://github.com/9router) tanpa perlu copy-paste manual satu per satu.
-- 📁 **Manajemen Kredensial Terstruktur**: Menyimpan data akun (username, user ID, fingerprint login, API key) ke folder lokal secara rapi.
-
----
-
-## 📋 Prasyarat Sistem
-
-1. **Python 3.8 atau lebih baru**.
-2. **Koneksi Internet**.
-3. **Proxy (HTTP / SOCKS5)**: Diperlukan untuk rotasi IP agar farming tidak terhambat limit (bisa di-generate otomatis via fitur scraper bawaan).
-4. *(Opsional)* Aplikasi **9Router** jika ingin memanfaatkan fitur auto-inject.
-5. *(Opsional)* Binary **Tor** jika ingin menggunakan mode farm via Tor pool.
+- 🤖 **Auto-Signup & Provisioning**: Automatically creates random usernames, registers accounts, allocates free token balances (*free token grant*) to new API keys, and verifies inference eligibility.
+- 🎲 **Gacha Proxy Farm**: Randomly selects a healthy proxy from the verified list to avoid IP restrictions (*HTTP 429 Rate Limit*).
+- 🔍 **Built-in Proxy Checker & Scraper**: Auto-scrapes from multiple public sources and performs real-time parallel latency checks.
+- 🧅 **Multi-Instance Tor Pool**: Supports creating a local Tor cluster for automatic identity rotation without limits.
+- 🔌 **Auto-Inject to 9Router**: Automatically inserts successfully farmed API keys directly into the SQLite database of [9Router](https://github.com/9router) without manual copy-paste.
+- 📁 **Structured Credential Management**: Stores account data (username, user ID, login fingerprint, API key) in a neat local folder.
 
 ---
 
-## 🛠️ Panduan Instalasi
+## 📋 System Requirements
 
-1. **Clone repository ini:**
+1. **Python 3.8 or newer**.
+2. **Internet connection**.
+3. **Proxy (HTTP / SOCKS5)**: Required for IP rotation so farming is not blocked by limits (can also be generated automatically via the built-in scraper).
+4. *(Optional)* **9Router** app if you want to use the auto-inject feature.
+5. *(Optional)* **Tor binary** if you want to use Tor pool farming mode.
+
+---
+
+## 🛠️ Installation Guide
+
+1. **Clone this repository:**
    ```bash
    git clone https://github.com/zidnifarchanramadhan-lang/dahl-farm.git
    cd dahl-farm
    ```
 
-2. **Pasang dependensi Python yang dibutuhkan:**
+2. **Install the required Python dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
 ---
 
-## 📖 Tutorial Penggunaan Lengkap
+## 📖 Full Usage Tutorial
 
-Terdapat dua cara mudah untuk menjalankan automasi ini:
+There are two easy ways to run this automation:
 
-### Cara 1: Menggunakan Menu Interaktif Windows (Paling Mudah)
+### Option 1: Use the Windows Interactive Menu (Easiest)
 
-Cukup klik dua kali file **`run.bat`** (atau ketik `run.bat` di terminal Command Prompt / PowerShell):
+Simply double-click the **`run.bat`** file (or type `run.bat` in Command Prompt / PowerShell):
 
 ```
 ============================================================
-     DAHL GLOBAL FARM (PASTI MENGGUNAKAN PROXY)
+     DAHL GLOBAL FARM (ALWAYS USE PROXY)
 ============================================================
 
- [1] Farm Akun (Wajib Pakai Proxy - Anti 429 dan Auto 9Router)
- [2] Filter / Cari Proxy Aktif Baru (filter_proxies.bat)
- [3] Inject Ulang Semua Key Tersimpan ke 9Router
- [4] Lihat Daftar Akun yang Sudah Terkumpul
- [5] Cek / Verifikasi Token API Key
- [0] Keluar
+ [1] Farm Accounts (Requires Proxy - Anti 429 and Auto 9Router)
+ [2] Filter / Find New Active Proxy (filter_proxies.bat)
+ [3] Re-Inject All Saved Keys into 9Router
+ [4] View the List of Accounts Already Collected
+ [5] Check / Verify API Key Token
+ [0] Exit
 
 ============================================================
-Pilih menu [1-5, 0]:
+Select menu [1-5, 0]:
 ```
 
-#### Alur Penggunaan yang Disarankan:
-1. **Langkah 1**: Pilih menu **`[2]`** terlebih dahulu untuk mencari proxy publik aktif yang lolos verifikasi Dahl Global. Script akan memeriksa proxy dan menyimpannya otomatis ke `proxies_good.txt`.
-2. **Langkah 2**: Pilih menu **`[1]`** untuk mulai melakukan farming akun. Masukkan jumlah akun yang ingin dibuat (misal: `5` atau `10`). Script akan merotasi proxy dan menyuntikkan token yang berhasil ke 9Router.
-3. **Langkah 3**: Pilih menu **`[4]`** untuk melihat rekapitulasi akun dan token yang sudah berhasil dikumpulkan.
+#### Recommended Flow:
+1. **Step 1**: Select **`[2]`** first to find active public proxies that pass Dahl Global validation. The script will check them and save them automatically to `proxies_good.txt`.
+2. **Step 2**: Select **`[1]`** to start farming accounts. Enter the number of accounts you want to create (for example: `5` or `10`). The script will rotate proxies and inject successful tokens into 9Router.
+3. **Step 3**: Select **`[4]`** to view the summary of accounts and tokens that have already been collected.
 
 ---
 
-### Cara 2: Menjalankan via Command Line (CLI)
+### Option 2: Run via Command Line (CLI)
 
-Anda juga dapat menjalankan perintah langsung melalui terminal:
+You can also run commands directly in the terminal:
 
-#### 1. Memfilter & Mencari Proxy Aktif
-Mencari 20 proxy hidup dan siap pakai:
+#### 1. Filter & Find Active Proxies
+Find 20 live proxies ready to use:
 ```bash
 python filter_proxies.py 20
 ```
-> *Catatan:* Jika belum ada file proxy lokal, script akan otomatis mengunduh ribuan proxy gratis dari internet dan mengetesnya satu per satu dengan multi-threading (80 worker paralel).
+> *Note:* If there is no local proxy file yet, the script will automatically download thousands of free proxies from the internet and test them one by one with multi-threading (80 parallel workers).
 
-#### 2. Menjalankan Gacha Proxy Farm (Disarankan)
-Membuat 10 akun dengan rotasi acak dari `proxies_good.txt` dan auto-inject ke 9Router:
+#### 2. Run the Gacha Proxy Farm (Recommended)
+Create 10 accounts with randomized rotation from `proxies_good.txt` and auto-inject to 9Router:
 ```bash
 python dahl_farm.py gachafarm 10
 ```
 
-Jika tidak ingin auto-inject ke 9Router, tambahkan flag `--no-inject`:
+If you do not want auto-inject to 9Router, add the `--no-inject` flag:
 ```bash
 python dahl_farm.py gachafarm 10 --no-inject
 ```
 
-#### 3. Farm Menggunakan Proxy Tunggal atau File Kustom
+#### 3. Farm Using a Single Proxy or Custom Proxy File
 ```bash
-# Menggunakan satu proxy tertentu:
+# Use one specific proxy:
 python dahl_farm.py proxyfarm 5 --proxy socks5://127.0.0.1:1080
 
-# Menggunakan daftar file proxy kustom:
+# Use a custom proxy list file:
 python dahl_farm.py proxyfarm 10 --file daftar_proxy_saya.txt
 ```
 
-#### 4. Mode Sequential (Standar Tanpa Proxy)
+#### 4. Sequential Mode (Default, Without Proxy)
 ```bash
 python dahl_farm.py farm 5 --delay 45
 ```
-*(Gunakan delay secukupnya agar IP internet Anda tidak terkena rate limit)*
+*(Use a sufficient delay so your internet IP does not get rate-limited)*
 
-#### 5. Menginjeksi Token Tersimpan ke 9Router
-Untuk memasukkan semua token yang sudah pernah di-farm sebelumnya ke 9Router:
+#### 5. Inject Saved Tokens into 9Router
+To insert all tokens that were previously farmed into 9Router:
 ```bash
 python dahl_farm.py inject9
 ```
 
-#### 6. Menampilkan Akun dan Uji API Key
+#### 6. Show Accounts and Test API Keys
 ```bash
-# Menampilkan semua akun yang sudah terkumpul di folder creds/
+# Show all accounts already collected in the creds/ folder
 python dahl_farm.py list
 
-# Menguji apakah sebuah API Key masih aktif dan merespon
+# Check whether an API key is still active and responding
 python dahl_farm.py check dahl_YOUR_API_KEY_HERE
 ```
 
 ---
 
-## ⚙️ Integrasi 9Router & Konfigurasi Path
+## ⚙️ 9Router Integration & Path Configuration
 
-Script secara default otomatis mendeteksi database lokal 9Router di lokasi standar:
+By default, the script automatically detects the local 9Router database in the standard location:
 - **Windows**: `%APPDATA%\9router\db\data.sqlite` (`C:\Users\YOUR_USERNAME\AppData\Roaming\9router\db\data.sqlite`)
 - **Linux / macOS**: `~/.9router/db/data.sqlite`
 
-### Mengatur Path Kustom (Opsional):
-Jika Anda menginstal 9Router di lokasi non-standar, Anda dapat menyetel environment variable:
+### Set a Custom Path (Optional):
+If you installed 9Router in a non-standard location, you can set the environment variable:
 ```bash
 # PowerShell:
 $env:YOUR_9ROUTER_DB_PATH="D:\custom_path\9router\db\data.sqlite"
@@ -154,33 +154,33 @@ export YOUR_9ROUTER_DB_PATH=/path/to/your/9router/db/data.sqlite
 
 ---
 
-## 📂 Struktur Direktori Proyek
+## 📂 Project Directory Structure
 
 ```
 dahl-farm/
-├── dahl_farm.py           # Core script automasi pendaftaran, API allocation, dan 9Router injection
-├── filter_proxies.py      # Multi-threaded proxy scraper & health checker
-├── filter_proxies.bat     # Shortcut bat untuk memfilter proxy di Windows
-├── run.bat                # Menu konsol interaktif utama (All-in-One CLI UI)
-├── farm.bat               # Shortcut cepat untuk menjalankan proses farming
-├── requirements.txt       # Daftar dependensi Python (httpx, socksio)
-├── proxies.example.txt    # Contoh template format proxy yang didukung
-├── keys.example.txt       # Template format penyimpanan API key
-├── .env.example           # Contoh konfigurasi environment variable
-├── .gitignore             # Menjaga kerahasiaan kredensial dan cache lokal
-└── creds/                 # (Lokal) Folder penyimpanan kredensial akun hasil farm (tidak di-upload)
+├── dahl_farm.py           # Core automation script for account signup, API allocation, and 9Router injection
+├── filter_proxies.py      # Multi-threaded proxy scraper and health checker
+├── filter_proxies.bat     # Windows batch shortcut to filter proxies
+├── run.bat                # Main interactive console menu (all-in-one CLI UI)
+├── farm.bat               # Quick shortcut for running the farming process
+├── requirements.txt       # Python dependency list (httpx, socksio)
+├── proxies.example.txt    # Example template for supported proxy formats
+├── keys.example.txt       # Template for API key storage format
+├── .env.example           # Example environment variable configuration
+├── .gitignore             # Protects credentials and local cache files
+└── creds/                 # (Local) Folder for stored farmed account credentials (not uploaded)
 ```
 
 ---
 
-## 🔒 Catatan Keamanan & Privasi
+## 🔒 Security & Privacy Notes
 
 > [!WARNING]
-> Folder `creds/` dan file `keys.txt` berisi *fingerprint* autentikasi dan token API aktif Anda. **Jangan pernah mengunggah atau membagikan isi folder tersebut ke publik.** 
-> File-file ini telah otomatis dikecualikan pada file `.gitignore`.
+> The `creds/` folder and `keys.txt` file contain your real authentication fingerprints and active API tokens. **Never upload or share the contents of these files publicly.**
+> These files are automatically excluded in `.gitignore`.
 
 ---
 
 ## ⚖️ Disclaimer
 
-Proyek ini dibuat untuk tujuan edukasi dan riset interoperabilitas API. Pengguna bertanggung jawab penuh atas penggunaan script ini sesuai dengan ketentuan layanan (*Terms of Service*) penyedia terkait.
+This project was created for educational purposes and API interoperability research. Users are fully responsible for using this script in accordance with the relevant service provider's Terms of Service.

@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
 """
-dahl_farm.py — SATU FILE: auto-farm kunci API inference.dahl.global.
-Gabungan dahl_farm / farm_fast / tor_pool / farm_pool / sync_keys / export_keys.
+dahl_farm.py — SINGLE FILE: auto-farm for inference.dahl.global API keys.
+Combines dahl_farm / farm_fast / tor_pool / farm_pool / sync_keys / export_keys.
 
-Reverse-engineered dari SPA Dahl (accountUi.*.js). Mendaftarkan akun baru
-otomatis (tanpa email/password — fingerprint acak), ambil API key, alokasikan
-free token grant, dan uji inference. Hasil disimpan per-akun di <dir>/creds/.
+Reverse-engineered from the Dahl SPA (accountUi.*.js). Creates new accounts
+automatically (without email/password — random fingerprint), fetches API keys,
+allocates the free token grant, and tests inference. Results are saved per account in <dir>/creds/.
 
-Zero-dep untuk mode dasar (stdlib). Mode Tor butuh `tor` + `httpx`.
+Zero-dep for the basic mode (stdlib). Tor mode requires `tor` + `httpx`.
 
 Usage:
   python3 dahl_farm.py farm 20 [--delay 45] [--skip-chat]   # sequential, zero-dep
-  python3 dahl_farm.py fast 50 [--workers 8] [--pace 5.2]   # paralel, zero-dep
+  python3 dahl_farm.py fast 50 [--workers 8] [--pace 5.2]   # parallel, zero-dep
   python3 dahl_farm.py gachafarm 20                         # farm via gacha proxy & auto-inject 9Router
-  python3 dahl_farm.py inject9                              # inject semua API key yang ada ke 9Router
+  python3 dahl_farm.py inject9                              # inject all existing API keys into 9Router
   python3 dahl_farm.py proxyfarm 20 [--file proxies.txt]    # farm via HTTP/SOCKS5 proxy
-  python3 dahl_farm.py proxyfarm 5 --proxy socks5://...     # farm via single proxy
-  python3 dahl_farm.py torup 6                              # start N tor instance
+  python3 dahl_farm.py proxyfarm 5 --proxy socks5://...     # farm via a single proxy
+  python3 dahl_farm.py torup 6                              # start N tor instances
   python3 dahl_farm.py torfarm 30 [--tor 6] [--pace 5]      # farm via tor pool
   python3 dahl_farm.py tordown                              # stop tor instances
-  python3 dahl_farm.py sync                                 # gabung key -> keys.txt
-  python3 dahl_farm.py export [--all] [--since YYYY-MM-DD]  # export key
-  python3 dahl_farm.py list                                 # daftar akun farmed
-  python3 dahl_farm.py check <TOKEN>                        # uji 1 key
+  python3 dahl_farm.py sync                                 # merge keys -> keys.txt
+  python3 dahl_farm.py export [--all] [--since YYYY-MM-DD]  # export keys
+  python3 dahl_farm.py list                                 # list farmed accounts
+  python3 dahl_farm.py check <TOKEN>                        # test a single key
 
-⚠️ JANGAN bagikan folder creds/ — itu fingerprint & API key akun asli.
+⚠️ DO NOT share the creds/ folder — it contains real account fingerprints & API keys.
 """
 
 import argparse
@@ -42,7 +42,7 @@ from http.cookiejar import CookieJar
 from pathlib import Path
 from urllib.request import HTTPCookieProcessor, Request, build_opener
 
-# ── konfigurasi ─────────────────────────────────────────────────────
+# ── configuration ─────────────────────────────────────────────────────
 BASE = "https://inference.dahl.global"
 HERE = Path(__file__).resolve().parent
 CREDS_DIR = HERE / "creds"
@@ -103,7 +103,7 @@ def save_cred(rec, idx):
     return f
 
 
-# ── klien sequential (urllib, zero-dep) ────────────────────────────
+# ── sequential client (urllib, zero-dep) ────────────────────────────
 class Dahl:
     def __init__(self):
         self.jar = CookieJar()
@@ -153,7 +153,7 @@ class Dahl:
 
 
 def do_signup(api, index, tag, backoff=8.0, max_tries=40, reroll_429=False):
-    """Signup dengan retry/backoff pada 429. Balikin (body, st)."""
+    """Sign up with retry/backoff on 429. Returns (body, st)."""
     last = None
     for attempt in range(max_tries):
         st, body = api.signup(rand_username())
@@ -171,10 +171,10 @@ def do_signup(api, index, tag, backoff=8.0, max_tries=40, reroll_429=False):
 
 # ── 9Router integration ─────────────────────────────────────────────
 def get_9router_db():
-    """Mencari path database SQLite 9Router lokal.
+    """Locate the local 9Router SQLite database path.
 
-    Dapat disesuaikan jika pengguna memiliki path kustom:
-    - Environment variable: YOUR_9ROUTER_DB_PATH atau ROUTER9_DB_PATH
+    It can be customized if the user has a non-default path:
+    - Environment variable: YOUR_9ROUTER_DB_PATH or ROUTER9_DB_PATH
     - Default Windows: %APPDATA%/9router/db/data.sqlite (C:/Users/YOUR_USERNAME/AppData/Roaming/9router/db/data.sqlite)
     - Default Linux/macOS: ~/.9router/db/data.sqlite
     """
@@ -191,10 +191,10 @@ def get_9router_db():
 
 
 def inject_to_9router(username, token):
-    """Memasukkan API key Dahl ke 9Router secara instan & otomatis."""
+    """Insert a Dahl API key into 9Router instantly and automatically."""
     db_path = get_9router_db()
     if not db_path:
-        return False, "Database 9Router tidak ditemukan"
+        return False, "9Router database not found"
     try:
         import sqlite3, uuid, datetime
         conn = sqlite3.connect(db_path)
@@ -202,7 +202,7 @@ def inject_to_9router(username, token):
         now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         node_id = "openai-compatible-chat-dahl"
 
-        # Cek / buat providerNode untuk dahl
+        # Check / create the providerNode for dahl
         cur.execute("SELECT id FROM providerNodes WHERE name='dahl' OR id=?", (node_id,))
         row = cur.fetchone()
         if not row:
@@ -218,7 +218,7 @@ def inject_to_9router(username, token):
         else:
             node_id = row[0]
 
-        # Cek apakah connection dengan token ini sudah ada
+        # Check whether a connection with this token already exists
         cur.execute("SELECT id FROM providerConnections WHERE data LIKE ?", (f"%{token}%",))
         if cur.fetchone():
             conn.close()
@@ -275,19 +275,19 @@ def finish_account(api, body, index, tag, model, skip_chat):
     user = body["user"]["username"]
     print(f"[{index:02d}{tag}] OK tok={tok[:12]}… pool={pool} SAVED {f.name}", flush=True)
 
-    # Otomatis langsung inject ke 9Router
+    # Automatically inject directly to 9Router
     try:
         if get_9router_db() is not None:
             inj_ok, conn = inject_to_9router(user, tok)
             if inj_ok and conn != "already exists":
-                print(f"  [9Router] ✓ Otomatis masuk ke 9Router (Active)", flush=True)
+                print(f"  [9Router] ✓ Automatically added to 9Router (Active)", flush=True)
     except Exception:
         pass
 
     return tok
 
 
-# ── sub: farm sequential (zero-dep) ────────────────────────────────
+# ── sub: sequential farm (zero-dep) ────────────────────────────────
 def cmd_farm(args):
     ok, fail = [], []
     for i in range(1, args.count + 1):
@@ -305,8 +305,8 @@ def cmd_farm(args):
     _summary(ok, fail)
 
 
-# ── sub: farm paralel (zero-dep, adaptive pacing) ──────────────────
-# 1 slot signup global; setup jalan di thread masing-masing.
+# ── sub: parallel farm (zero-dep, adaptive pacing) ──────────────────
+# 1 global signup slot; each worker thread runs independently.
 _pace_lock = threading.Lock()
 _next_ok = 0.0
 PACE = 5.2
@@ -377,7 +377,7 @@ def _tor_conf(i):
 
 def cmd_torup(args):
     if not Path(TOR_BIN).exists():
-        sys.exit(f"tor binary tidak ada: {TOR_BIN} — pastikan tor terinstall atau ada di folder tor/")
+        sys.exit(f"tor binary not found: {TOR_BIN} — make sure tor is installed or placed in the tor/ folder")
     n = args.count
     for i in range(n):
         conf = _tor_conf(i)
@@ -412,7 +412,7 @@ def cmd_tordown(args):
                 pid_file.unlink(missing_ok=True)
             except Exception:
                 pass
-    print(f"Tor pool dihentikan: {stopped} instance.")
+    print(f"Tor pool stopped: {stopped} instances.")
 
 def _tor_wait(n, timeout=90):
     deadline = time.time() + timeout
@@ -453,7 +453,7 @@ def _tor_ip(i):
         return "?"
 
 
-# ── sub: farm via tor pool (butuh httpx + tor) ─────────────────────
+# ── sub: farm via tor pool (requires httpx + tor) ─────────────────────
 class DahlPool:
     def __init__(self, idx):
         import httpx
@@ -498,13 +498,13 @@ def cmd_torfarm(args):
     try:
         import httpx  # noqa: F401
     except ImportError:
-        sys.exit("httpx tidak ada — install: pip install -r requirements.txt")
+        sys.exit("httpx is missing — install: pip install -r requirements.txt")
     n = args.tor
-    print("== cek tor pool ==")
+    print("== check tor pool ==")
     _tor_wait(n, timeout=30)
     for i in range(n):
         print(f"[tor{i}] {_tor_ip(i)}", flush=True)
-    print(f"== farm {args.count} via {n} tor instance ==")
+    print(f"== farm {args.count} via {n} tor instances ==")
     ok, fail = [], []
     for i in range(1, args.count + 1):
         pidx = (i - 1) % n
@@ -576,7 +576,7 @@ def cmd_proxyfarm(args):
     try:
         import httpx  # noqa: F401
     except ImportError:
-        sys.exit("httpx tidak ada — install: pip install -r requirements.txt")
+        sys.exit("httpx is missing — install: pip install -r requirements.txt")
 
     proxies = []
     if args.proxy:
@@ -586,7 +586,7 @@ def cmd_proxyfarm(args):
     elif args.file:
         pf = Path(args.file)
         if not pf.exists():
-            sys.exit(f"File proxy tidak ditemukan: {pf}")
+            sys.exit(f"Proxy file not found: {pf}")
         for line in pf.read_text(encoding="utf-8", errors="ignore").splitlines():
             norm = _normalize_proxy(line)
             if norm:
@@ -600,7 +600,7 @@ def cmd_proxyfarm(args):
                     proxies.append(norm)
 
     if not proxies:
-        sys.exit("Tidak ada proxy! Buat file proxies.txt atau gunakan opsi --proxy <URL> atau --file <PATH>.\nLihat contoh di proxies.example.txt")
+        sys.exit("No proxy available! Create a proxies.txt file or use the --proxy <URL> or --file <PATH> option.\nSee the example in proxies.example.txt")
 
     print(f"== Loaded {len(proxies)} proxies, farming {args.count} accounts ==")
     ok, fail = [], []
@@ -624,10 +624,10 @@ def cmd_proxyfarm(args):
 
 
 def cmd_inject9(args):
-    """Inject semua API key yang ada di creds/ dan keys.txt ke 9Router."""
+    """Inject all API keys present in creds/ and keys.txt into 9Router."""
     db_path = get_9router_db()
     if not db_path:
-        sys.exit("Database 9Router tidak ditemukan! Pastikan 9Router terpasang di %APPDATA%/9router/db/data.sqlite atau atur YOUR_9ROUTER_DB_PATH.")
+        sys.exit("9Router database not found! Make sure 9Router is installed in %APPDATA%/9router/db/data.sqlite or set YOUR_9ROUTER_DB_PATH.")
 
     injected, skipped = 0, 0
     PAT_API = re.compile(r"^api_key:\s*(dahl_\w+)", re.M)
@@ -649,7 +649,7 @@ def cmd_inject9(args):
                 if not any(k == line for _, k in items):
                     items.append((f"user_{line[-6:]}", line))
 
-    print(f"== Menemukan {len(items)} akun, menginject ke 9Router... ==")
+    print(f"== Found {len(items)} accounts, injecting into 9Router... ==")
     for user, key in items:
         ok, res = inject_to_9router(user, key)
         if ok:
@@ -659,9 +659,9 @@ def cmd_inject9(args):
                 injected += 1
                 print(f"  [9Router] + Injected: {user} ({key[:16]}...)")
         else:
-            print(f"  [9Router] ! Gagal: {user} ({res})")
+            print(f"  [9Router] ! Failed: {user} ({res})")
 
-    print(f"\nSelesai! {injected} akun berhasil di-inject ke 9Router, {skipped} sudah ada sebelumnya.")
+    print(f"\nDone! {injected} accounts were successfully injected into 9Router, {skipped} were already present.")
 
 
 def load_good_proxies():
@@ -674,27 +674,27 @@ def load_good_proxies():
 
 
 def cmd_gachafarm(args):
-    """Farming akun dengan sistem Gacha Proxy (acak dari proxies_good.txt) dan auto-inject ke 9Router."""
+    """Farm accounts using the Gacha Proxy system (random from proxies_good.txt) and auto-inject to 9Router."""
     try:
         import httpx
     except ImportError:
-        sys.exit("httpx tidak ada — install: pip install -r requirements.txt")
+        sys.exit("httpx is missing — install: pip install -r requirements.txt")
 
     good_proxies = load_good_proxies()
     if not good_proxies:
-        print("File proxies_good.txt belum ada / kosong.")
-        print("Menjalankan filter_proxies.py otomatis untuk mengumpulkan proxy aktif...")
+        print("The proxies_good.txt file is missing or empty.")
+        print("Running filter_proxies.py automatically to collect active proxies...")
         import subprocess
         subprocess.run([sys.executable, str(HERE / "filter_proxies.py"), str(args.count * 3)])
         good_proxies = load_good_proxies()
 
     if not good_proxies:
-        sys.exit("Tidak ada proxy aktif yang tersedia di proxies_good.txt! Jalankan: python filter_proxies.py")
+        sys.exit("No active proxies are available in proxies_good.txt! Run: python filter_proxies.py")
 
-    print(f"\n== GACHA PROXY FARM: {args.count} Akun | Pool: {len(good_proxies)} Proxy Aktif ==")
+    print(f"\n== GACHA PROXY FARM: {args.count} Accounts | Pool: {len(good_proxies)} Active Proxies ==")
     auto_inject = not args.no_inject and get_9router_db() is not None
     if auto_inject:
-        print("== Mode Auto-Inject ke 9Router: AKTIF ==")
+        print("== Auto-Inject to 9Router Mode: ACTIVE ==")
 
     ok, fail = [], []
     for i in range(1, args.count + 1):
@@ -718,12 +718,12 @@ def cmd_gachafarm(args):
             except Exception as e:
                 err_str = str(e)
                 if "rate-limited" in err_str or "429" in err_str:
-                    print(f"  [Gacha] Proxy limit (429) -> Langsung gacha proxy lain...")
+                    print(f"  [Gacha] Proxy limit (429) -> pick another proxy immediately...")
                 else:
-                    print(f"  [Gacha] Gagal ({err_str[:80]}) -> Gacha proxy lain...")
+                    print(f"  [Gacha] Failed ({err_str[:80]}) -> pick another proxy...")
 
         if not success:
-            print(f"[{i:02d}] GAGAL setelah 30x reroll gacha.")
+            print(f"[{i:02d}] FAILED after 30 gacha rerolls.")
             fail.append(i)
 
         if i < args.count and args.delay:
@@ -800,7 +800,7 @@ def _summary(ok, fail):
 
 
 def main():
-    ap = argparse.ArgumentParser(prog="dahl_farm", description="dahl.global auto-farm — satu file")
+    ap = argparse.ArgumentParser(prog="dahl_farm", description="dahl.global auto-farm — single file")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("farm", help="sequential farm (zero-dep)")
@@ -822,13 +822,13 @@ def main():
     p = sub.add_parser("tordown", help="stop running tor instances")
     p.set_defaults(fn=cmd_tordown)
 
-    p = sub.add_parser("torfarm", help="farm via tor pool (butuh httpx+tor)")
+    p = sub.add_parser("torfarm", help="farm via tor pool (requires httpx+tor)")
     p.add_argument("count", type=int); p.add_argument("--tor", type=int, default=6)
     p.add_argument("--pace", type=float, default=5.0); p.add_argument("--backoff", type=float, default=8.0)
     p.add_argument("--model", default=MODEL_DEFAULT); p.add_argument("--skip-chat", action="store_true")
     p.set_defaults(fn=cmd_torfarm)
 
-    p = sub.add_parser("proxyfarm", help="farm via HTTP/SOCKS5 proxy pool (butuh httpx)")
+    p = sub.add_parser("proxyfarm", help="farm via HTTP/SOCKS5 proxy pool (requires httpx)")
     p.add_argument("count", type=int)
     p.add_argument("--proxy", help="single proxy url, e.g. http://user:pass@ip:port")
     p.add_argument("--file", help="path to proxies file (default: proxies.txt)")
@@ -837,15 +837,15 @@ def main():
     p.add_argument("--model", default=MODEL_DEFAULT); p.add_argument("--skip-chat", action="store_true")
     p.set_defaults(fn=cmd_proxyfarm)
 
-    p = sub.add_parser("gachafarm", help="farm dengan proxy acak dari proxies_good.txt & auto-inject 9Router")
+    p = sub.add_parser("gachafarm", help="farm using random proxies from proxies_good.txt & auto-inject 9Router")
     p.add_argument("count", type=int)
     p.add_argument("--delay", type=float, default=2.0)
     p.add_argument("--backoff", type=float, default=8.0)
-    p.add_argument("--no-inject", action="store_true", help="jangan auto-inject ke 9Router")
+    p.add_argument("--no-inject", action="store_true", help="do not auto-inject to 9Router")
     p.add_argument("--model", default=MODEL_DEFAULT); p.add_argument("--skip-chat", action="store_true")
     p.set_defaults(fn=cmd_gachafarm)
 
-    p = sub.add_parser("inject9", help="inject semua key yang ada ke 9Router")
+    p = sub.add_parser("inject9", help="inject all existing keys into 9Router")
     p.set_defaults(fn=cmd_inject9)
 
     p = sub.add_parser("sync", help="merge creds -> keys.txt"); p.set_defaults(fn=cmd_sync)
